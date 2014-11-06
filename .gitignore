@@ -1,5 +1,5 @@
 vendor
-app/config.yml
+app/config/config.yml
 composer.phar
 composer.lock
 .vagrant

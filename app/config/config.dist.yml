@@ -1,0 +1,12 @@
+deployments:
+    <name of deployment>:
+        type: <deployment type>
+        path: /path/to/deployment
+        
+database:
+    driver: pdo_mysql
+    host: localhost
+    user: root
+    password: password
+    dbname: cloud-deploy
+    port: 3306
