@@ -19,8 +19,8 @@ class DeployCommand extends Command {
 		
 	protected function configure() {
 		$this
-			->setName('check-release')
-			->setDescription('Check whether the current release is current')
+			->setName('do-upgrade')
+			->setDescription('Check whether the deployment is current and upgrade if necessary ')
 			->addArgument('deployment', InputArgument::REQUIRED, 'Name of deployment to check');
 	}
 	
@@ -30,14 +30,19 @@ class DeployCommand extends Command {
 		
 		$deployment	= $this->getDeployment($this->input->getArgument('deployment'));
 		$release = $this->getDeployService()->getCurrentReleaseVersion($deployment);
-			
-		$this->output->writeLn('<comment>Release:</comment>        '. $release->getVersionType() .' : ' .  $release->getVersionName());
-		$this->output->writeLn('<comment>Release Commit:</comment> '. $release->getVersionCommit());
-		$this->output->writeLn('<comment>Current Commit:</comment> '. $deployment->getCurrentCommit());		
 		
-		if ( $deployment->getCurrentCommit() != $release->getVersionCommit() ) {
+		$this->output->writeLn('<info>Compiling release and deployment information...</info>');
+		$this->output->writeLn('<comment>Release:</comment>        '. $release->getVersionType() .' : ' .  $release->getVersionName());
+		
+		$release_commit = $release->getVersionCommit();
+		$current_commit = $deployment->getCurrentCommit();
+		
+		$this->output->writeLn('<comment>Release Commit:</comment> '. $release_commit .' ('. $release_commit->getDatetimeAuthor()->format('Y-m-d H:i:s') .')');
+		$this->output->writeLn('<comment>Current Commit:</comment> '. $current_commit .' ('. $current_commit->getDatetimeAuthor()->format('Y-m-d H:i:s') .')');		
+		
+		if ( $current_commit != $release_commit ) {
 			$this->output->writeLn('<info>Deploying...</info>');
-			$this->getDeployService()->deploy($release);
+			$this->getDeployService()->do_upgrade($release, gethostname());
 			$this->output->writeLn('Done!');
 		} else {
 			$this->output->writeLn('<info>Currently at the correct version</info');
