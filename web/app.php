@@ -1,7 +1,6 @@
 <?php
 ini_set('display_errors', 1);
 
-require_once __DIR__.'/../vendor/autoload.php';
-require_once __DIR__.'/../app/AppKernel.php';
+$app	= require(__DIR__ . '/../bootstrap.php');
 
-$kernal	= new app\AppKernel('prod', false);
+$app->run();

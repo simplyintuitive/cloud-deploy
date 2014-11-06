@@ -35,6 +35,11 @@ class DeploymentService
 		return new Release($deployment, $row);
 	}
 	
+	public function deploy(Release $release) {
+		$release->getDeployment()->fetch();
+		$release->getDeployment()->checkout($release->getVersionCommit());
+	}
+	
 	/**
 	 * @param string $name
 	 * @return Deployment

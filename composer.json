@@ -11,12 +11,13 @@
 		"symfony/security-csrf": "~2.4",
 		"symfony/yaml": "~2.4",
 		"deralex/yaml-config-service-provider": "1.0.x-dev",
-		"cypresslab/gitelephant": "~1.0"
+		"cypresslab/gitelephant": "~1.0",
+		"knplabs/console-service-provider": "dev-master"
 	},
 	
 	"autoload": {
 		"psr-0": {
-			"CloudDeploy": "src/"
+			"": "src/"
 		}
 	}
 }

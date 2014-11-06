@@ -5,6 +5,7 @@ namespace app;
 use CloudDeploy\Controller\DeploymentControllerProvider;
 use CloudDeploy\Service\DeploymentService;
 use DerAlex\Silex\YamlConfigServiceProvider;
+use Knp\Provider\ConsoleServiceProvider;
 use Silex\Application;
 use Silex\Provider\FormServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
@@ -32,8 +33,13 @@ class AppKernel {
 		$this
 			->registerServices()
 			->addRoutes();
-		
-		$this->app->run();
+	}	
+	
+	/**
+	 * @return Application
+	 */
+	public function getApp() {
+		return $this->app;
 	}
 	
 	private function addRoutes() {
@@ -49,13 +55,19 @@ class AppKernel {
 		$this->app->register(new UrlGeneratorServiceProvider());		
 		$this->app->register(new DoctrineServiceProvider(), ['db.options' => $this->app['config']['database']]);
 		//$this->app->register(new FormServiceProvider());
-		//$this->app->register(new ValidatorServiceProvider()); 
+		//$this->app->register(new ValidatorServiceProvider());
+		$this->app->register(new ConsoleServiceProvider(), array(
+			'console.name' => 'ConsoleApp',
+			'console.version' => '1.0.0',
+			'console.project_directory' => __DIR__ . '/..'
+		));
 		
 		$this->app['cloud-deploy'] = new DeploymentService($this->app);
 		
-		$this->app->register(new TwigServiceProvider(), array(
-			'twig.path' => __DIR__.'/../src/CloudDeploy/Resources/views',
-		));
+		$this->app->register(new TwigServiceProvider(), [
+			'twig.path' => __DIR__ . '/../src/CloudDeploy/Resources/views',
+			//'twig.options' => ['cache' => __DIR__ . '/cache/' . $this->app['env'] .'/twig/'],
+		]);
 		
 		return $this;
 	}

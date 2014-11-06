@@ -4,6 +4,7 @@ namespace CloudDeploy\Git;
 
 use Exception;
 
+use GitElephant\Command\FetchCommand;
 use GitElephant\Objects\Branch;
 use GitElephant\Objects\Commit;
 use GitElephant\Objects\Tag;
@@ -113,5 +114,23 @@ class Deployment {
 	public function getAllBranches() {
 		return $this->repository->getBranches();
 	}
+	
+	/**
+	 * Fetch objects from another repository.
+	 * 
+	 * @param string $from
+	 * @param string $branch - commit reference
+	 */
+	public function fetch($from = null, $branch = null) {
+		$this->repository->fetch($from, $branch);
+	}
 
+	/**
+	 * Checkout a commit
+	 * 
+	 * @param string $ref - reference for commit
+	 */
+	public function checkout($ref) {
+		$this->repository->checkout($ref);
+	}
 }
