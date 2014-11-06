@@ -2,3 +2,4 @@ vendor
 app/config.yml
 composer.phar
 composer.lock
+.vagrant
