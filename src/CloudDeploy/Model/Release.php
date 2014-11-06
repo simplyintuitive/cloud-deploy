@@ -14,7 +14,10 @@ class Release {
 	private $deployment;
 	
 	/** @var string */
-	private $version;
+	private $versionType;
+	
+	/** @var string */
+	private $versionName;
 		
 	/** @var DateTime */
 	private $date;
@@ -26,8 +29,8 @@ class Release {
 	public function __construct(Deployment $deployment, array $row_data) {
 		$this->deployment = $deployment;
 		$this->id         = $row_data['release_id'];
-		$this->version    = $row_data['version'];
 		$this->date       = new DateTime($row_data['release_date']);
+		list($this->versionType, $this->versionName) = explode(':', $row_data['version']);
 	}
 
 	/**
@@ -47,8 +50,20 @@ class Release {
 	/**
 	 * @return string
 	 */
-	public function getVersion() {
-		return $this->version;
+	public function getVersionType() {
+		return $this->versionType;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getVersionName() {
+		return $this->versionName;
+	}
+	
+	public function getVersionCommit() {
+		$method	= 'get' . ucfirst($this->getVersionType());
+		return $this->deployment->getCommit($this->deployment->{$method}($this->getVersionName())->getSha());
 	}
 	
 	/**

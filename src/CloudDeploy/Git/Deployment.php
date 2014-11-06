@@ -5,6 +5,7 @@ namespace CloudDeploy\Git;
 use Exception;
 
 use GitElephant\Objects\Branch;
+use GitElephant\Objects\Commit;
 use GitElephant\Objects\Tag;
 use GitElephant\Repository as GitRepository;
 
@@ -33,14 +34,40 @@ class Deployment {
 	}
 	
 	/**
-	 * @return string
+	 * @return Commit
 	 */
-	public function getCurrentVersion() {
+	public function getCurrentCommit() {
 		return $this->repository->getCommit();
+	}
+	
+	/**
+	 * 
+	 * @param string $commit
+	 * @return Commit
+	 * @throws Exception
+	 */
+	public function getCommit($commit) {
+		if ( !$commit = $this->repository->getCommit($commit) ) {
+			throw new Exception(sprintf('Commit %s does not exist', $commit));
+		}
+		
+		return $commit;
+	}
+	
+	/**
+	 * @return Tag|null
+	 */
+	public function getCurrentTag() {
+		foreach ( $this->repository->getTags() as $tag) {
+			if ( $this->getCurrentCommit()->getSha() == $tag->getSha() ) {
+				return $tag;
+			}
+		}
+		
+		return null;
 	}
 
 	/**
-	 * 
 	 * @param string $tag_name
 	 * @return Tag
 	 * @throws Exception
@@ -61,6 +88,13 @@ class Deployment {
 	}
 	
 	/**
+	 * @return Branch|null
+	 */
+	public function getCurrentBranch() {
+		return $this->repository->getMainBranch();
+	}
+	
+	/**
 	 * @param string $branch_name
 	 * @return Branch
 	 * @throws Exception
@@ -74,18 +108,10 @@ class Deployment {
 	}
 	
 	/**
-	 * 
 	 * @return []Branch
 	 */
 	public function getAllBranches() {
 		return $this->repository->getBranches();
-	}
-	
-	/**
-	 * @return Branch
-	 */
-	public function getCurrentBranch() {
-		return $this->repository->getMainBranch();
 	}
 
 }
