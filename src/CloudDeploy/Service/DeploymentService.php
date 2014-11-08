@@ -34,7 +34,9 @@ class DeploymentService {
 	public function getCurrentReleaseVersion(Deployment $deployment) {
 		$sql = "SELECT * FROM releases WHERE deployment = ? ORDER BY release_date DESC LIMIT 1";
 		$row = $this->getDb()->fetchAssoc($sql, array($deployment->getName()));
-		
+		if ( !$row ) {
+			throw new \Exception('There are no releases.');
+		}
 		
 		return new Release($deployment, $row);
 	}
