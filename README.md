@@ -1,5 +1,7 @@
 # Cloud Deploy
-Cloud Deploy is a cloud deployment system allowing nodes to poll a server for releases and deploy upgrades via pull.
+Cloud Deploy is a cloud deployment system that monitors software deployments on nodes and deploys upgrades by pulling them from a central GIT repository.
+
+Cloud Deploy supports multiple software deployments on a single node, allowing multiple software project to be monitored and upgraded.
 
 This library is written in the [Silex PHP micro-framework](http://silex.sensiolabs.org/). Currently it only supports Git to perform file upgrades, and MySQL to store current releases.
 
