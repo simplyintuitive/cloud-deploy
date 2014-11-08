@@ -3,7 +3,7 @@ Cloud Deploy is a cloud deployment system that monitors software deployments on 
 
 Cloud Deploy supports multiple software deployments on a single node, allowing multiple software project to be monitored and upgraded.
 
-This library is written in the [Silex PHP micro-framework](http://silex.sensiolabs.org/). Currently it only supports Git to perform file upgrades, and MySQL to store current releases.
+This library is written in the [Silex PHP micro-framework](http://silex.sensiolabs.org/) and uses the [GitElephant](https://github.com/matteosister/GitElephant) library. Currently it only supports Git to perform file upgrades, and MySQL to store current releases.
 
 How it works
 ------------
