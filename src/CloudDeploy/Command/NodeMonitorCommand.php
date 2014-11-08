@@ -3,6 +3,7 @@
 namespace CloudDeploy\Command;
 
 use CloudDeploy\Git\Deployment;
+use CloudDeploy\Model\Release;
 use CloudDeploy\Service\DeploymentService;
 use Knp\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -29,23 +30,50 @@ class NodeMonitorCommand extends Command {
 		$this->output	= $output;
 		
 		$deployment	= $this->getDeployment($this->input->getArgument('deployment'));
+		
 		$release = $this->getDeployService()->getCurrentReleaseVersion($deployment);
 		
 		$this->output->writeLn('<info>Compiling release and deployment information...</info>');
-		$this->output->writeLn('<comment>Release:</comment>        '. $release->getVersionType() .' : ' .  $release->getVersionName());
+		$this->output->writeLn('  <comment>Release:</comment> '. str_pad(ucfirst($release->getVersionType()), 6) .' : ' .  $release->getVersionName());
+		$this->output->writeLn('  <comment>Current:</comment> '. $this->determineCurrentCheckout($deployment));	
 		
-		$release_commit = $release->getVersionCommit();
-		$current_commit = $deployment->getCurrentCommit();
+		$upgrade_required = false;
+		switch ( $release->getVersionType() ) {
+			case Release::TYPE_BRANCH:
+				$upgrade_required = true;
+				break;
+				
+			case Release::TYPE_TAG:
+				$current_tag = $deployment->getCurrentTag();
+				$upgrade_required = ( !$current_tag || $release->getVersionName() != $current_tag->getName() );
+				break;
+				
+			case Release::TYPE_COMMIT:
+				$current_commit = $deployment->getCurrentCommit();
+				$upgrade_required = ( $release->getVersionName() != $current_commit );
+				break;
+		}
 		
-		$this->output->writeLn('<comment>Release Commit:</comment> '. $release_commit .' ('. $release_commit->getDatetimeAuthor()->format('Y-m-d H:i:s') .')');
-		$this->output->writeLn('<comment>Current Commit:</comment> '. $current_commit .' ('. $current_commit->getDatetimeAuthor()->format('Y-m-d H:i:s') .')');		
-		
-		if ( $current_commit != $release_commit ) {
-			$this->output->writeLn('<info>Deploying...</info>');
+		if ( $upgrade_required ) {
+			$this->output->writeLn('<info>Upgrading...</info>');
 			$this->getDeployService()->do_upgrade($release, gethostname());
-			$this->output->writeLn('Done!');
+			$this->output->writeLn('<info>Done!</info>');
 		} else {
-			$this->output->writeLn('<info>Currently at the correct version</info');
+			$this->output->writeLn('<info>Currently at the correct version</info>');
+		}
+	}
+	
+	/**
+	 * @param Deployment $deployment
+	 * @return string
+	 */
+	private function determineCurrentCheckout($deployment) {
+		if ( $current_branch = $deployment->getCurrentBranch() ) {
+			return 'Branch : ' . $current_branch->getName();
+		} else if ( $current_tag = $deployment->getCurrentTag() ) {
+			return 'Tag    : ' . $current_tag->getName();
+		} else {
+			return 'Commit : '. $deployment->getCurrentCommit()->getSha(true);
 		}
 	}
 	

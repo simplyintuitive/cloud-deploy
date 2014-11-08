@@ -10,6 +10,7 @@ class Upgrade {
 	const STATUS_STARTED    = 'started';
 	const STATUS_FETCH      = 'fetching';
 	const STATUS_CHECKOUT   = 'checking out';
+	const STATUS_PULL       = 'pulling';
 	const STATUS_SUBMODULE  = 'checking out submodules';
 	const STATUS_COMPLETE   = 'complete';
 	const STATUS_ABORT      = 'aborted';

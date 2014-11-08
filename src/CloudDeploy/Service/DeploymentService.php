@@ -92,9 +92,15 @@ class DeploymentService {
 	 * @param Upgrade $upgrade
 	 * @return $this
 	 */
-	private function checkoutUpgrade(Upgrade $upgrade) {
-		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_FETCH);
-		$upgrade->getRelease()->getDeployment()->checkout($upgrade->getRelease()->getVersionCommit());
+	private function checkoutUpgrade(Upgrade $upgrade, $output) {
+		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_CHECKOUT);
+		
+		$upgrade->getRelease()->getDeployment()->checkout($upgrade->getRelease()->getVersionName());
+		
+		if ( Release::TYPE_BRANCH == $upgrade->getRelease()->getVersionType() ) {
+			$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_PULL);
+			$upgrade->getRelease()->getDeployment()->pull($upgrade->getRelease()->getVersionName());
+		}
 		
 		return $this;
 	}
