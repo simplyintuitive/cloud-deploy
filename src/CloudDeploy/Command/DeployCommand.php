@@ -19,7 +19,7 @@ class DeployCommand extends Command {
 		
 	protected function configure() {
 		$this
-			->setName('do-upgrade')
+			->setName('node:upgrade')
 			->setDescription('Check whether the deployment is current and upgrade if necessary ')
 			->addArgument('deployment', InputArgument::REQUIRED, 'Name of deployment to check');
 	}
