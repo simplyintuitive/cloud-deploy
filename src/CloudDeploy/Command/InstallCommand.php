@@ -9,6 +9,9 @@ use Symfony\Component\Process\Process;
 
 class InstallCommand extends Command
 {
+	/** @var OutputInterface */
+	private $output;
+	
 	protected function configure() {
 		$this
 			->setName('cloud-deploy:install')
@@ -21,7 +24,9 @@ class InstallCommand extends Command
 	 * @throws \RuntimeException
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		$output->writeLn('<info>Installing...</info>');
+		$this->output = $output;
+		
+		$this->output->writeLn('<info>Installing...</info>');
 		
 		$config		= $this->getSilexApplication()['config'];
 		$mysql_cmd	= $this->getMySqlCmd($config);
@@ -30,7 +35,7 @@ class InstallCommand extends Command
 		$this->createDb($mysql_cmd, $dbname);
 		$this->createTables($mysql_cmd, $dbname);
 		
-		$output->writeLn('<info>Done!</info>');
+		$this->output->writeLn('<info>Done!</info>');
 	}
 	
 	/**
@@ -44,15 +49,19 @@ class InstallCommand extends Command
 		// Attempt to query database - an exception will be thrown if it does not exist
 		try {
 			$this->getSilexApplication()['db']->fetchAssoc('SELECT 1');
-		} catch (\Exception $e) {
-			// Create database
-			$sql = escapeshellarg(sprintf('CREATE DATABASE IF NOT EXISTS `%s`;', $dbname));
-			$cmd = sprintf('echo %s | %s', $sql, $mysql_cmd);
+		} catch (\PDOException $e) {
+			if ( false === strpos($e->getMessage(), 'Access denied') ) {
+				// Create database
+				$sql = escapeshellarg(sprintf('CREATE DATABASE IF NOT EXISTS `%s`;', $dbname));
+				$cmd = sprintf('echo %s | %s', $sql, $mysql_cmd);
 
-			$process = new Process($cmd);
-			$process->run(function ($type, $buffer) { echo $buffer; });
-			if (!$process->isSuccessful()) {
-				throw new \RuntimeException(sprintf("An error occurred when attempting to create the database. Check user permissions.\n\n%s", $cmd));
+				$process = new Process($cmd);
+				$process->run(function ($type, $buffer) {});
+				if (!$process->isSuccessful()) {
+					throw new \RuntimeException(sprintf("An error occurred when attempting to create the database. Check user permissions.\n\n%s", $cmd));
+				}
+			} else {
+				throw new \RuntimeException(sprintf("Unable to query the MySQL database due to access restrictions. Please check user has sufficient rights to SELECT, INSERT, UPDATE and DELETE.\n\n%s", $e->getMessage()));
 			}
 		}
 	}
@@ -68,7 +77,7 @@ class InstallCommand extends Command
 		$cmd = sprintf('%s %s < %s', $mysql_cmd, $dbname, __DIR__ .'/../Resources/sql/install.sql');
 
         $process = new Process($cmd);
-        $process->run(function ($type, $buffer) { echo $buffer; });
+		$process->run(function ($type, $buffer) {});
         if (!$process->isSuccessful()) {
             throw new \RuntimeException(sprintf("An error occurred when executing the mysql command.\n\n%s", $cmd));
         }
