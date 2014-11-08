@@ -41,14 +41,20 @@ class InstallCommand extends Command
 	 * @throws \RuntimeException
 	 */
 	private function createDb($mysql_cmd, $dbname) {
-		$sql = escapeshellarg(sprintf('CREATE DATABASE IF NOT EXISTS `%s`;', $dbname));
-		$cmd = sprintf('echo %s | %s', $sql, $mysql_cmd);
+		// Attempt to query database - an exception will be thrown if it does not exist
+		try {
+			$this->getSilexApplication()['db']->fetchAssoc('SELECT 1');
+		} catch (\Exception $e) {
+			// Create database
+			$sql = escapeshellarg(sprintf('CREATE DATABASE IF NOT EXISTS `%s`;', $dbname));
+			$cmd = sprintf('echo %s | %s', $sql, $mysql_cmd);
 
-        $process = new Process($cmd);
-        $process->run(function ($type, $buffer) { echo $buffer; });
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException(sprintf("An error occurred when attempting to create the database. Check user permissions.\n\n%s", $cmd));
-        }
+			$process = new Process($cmd);
+			$process->run(function ($type, $buffer) { echo $buffer; });
+			if (!$process->isSuccessful()) {
+				throw new \RuntimeException(sprintf("An error occurred when attempting to create the database. Check user permissions.\n\n%s", $cmd));
+			}
+		}
 	}
 	
 	/**
