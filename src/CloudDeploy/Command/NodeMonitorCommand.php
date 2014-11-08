@@ -40,7 +40,16 @@ class NodeMonitorCommand extends Command {
 		$upgrade_required = false;
 		switch ( $release->getVersionType() ) {
 			case Release::TYPE_BRANCH:
-				$upgrade_required = true;
+				$current_branch = $deployment->getCurrentBranch();
+				if ( $current_branch ) {
+					$this->fetchBranch($deployment, $current_branch);
+				}
+				if ( !$current_branch
+					|| $current_branch->getName() != $release->getVersionName()
+					|| $current_branch->getSha() != $deployment->getBranch($release->getVersionName())->getSha() )
+					{
+					$upgrade_required = true;
+				}
 				break;
 				
 			case Release::TYPE_TAG:
@@ -75,6 +84,14 @@ class NodeMonitorCommand extends Command {
 		} else {
 			return 'Commit : '. $deployment->getCurrentCommit()->getSha(true);
 		}
+	}
+	
+	/**
+	 * @param Deployment $deployment
+	 */
+	private function fetchBranch(Deployment $deployment, \GitElephant\Objects\Branch $branch) {
+		$this->output->writeLn(sprintf('<info>Fetching latest changes on branch "%s"...</info>', $branch->getName()));
+		$deployment->fetch('origin', $branch->getName());
 	}
 	
 	/**
