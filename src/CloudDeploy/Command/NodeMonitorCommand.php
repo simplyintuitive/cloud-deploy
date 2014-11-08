@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeployCommand extends Command {
+class NodeMonitorCommand extends Command {
 	
 	/** @var InputInterface */
 	private $input;
@@ -19,7 +19,7 @@ class DeployCommand extends Command {
 		
 	protected function configure() {
 		$this
-			->setName('node:upgrade')
+			->setName('node:monitor')
 			->setDescription('Check whether the deployment is current and upgrade if necessary ')
 			->addArgument('deployment', InputArgument::REQUIRED, 'Name of deployment to check');
 	}

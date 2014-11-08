@@ -5,6 +5,6 @@ set_time_limit(0);
 
 $app = require(__DIR__.'/../bootstrap.php');
 
-$app['console']->add(new CloudDeploy\Command\DeployCommand());
+$app['console']->add(new CloudDeploy\Command\NodeMonitorCommand());
 $app['console']->add(new CloudDeploy\Command\InstallCommand());
 $app['console']->run();
