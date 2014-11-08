@@ -55,6 +55,14 @@ $ curl -s https://getcomposer.org/installer | php
 $ composer install
 ```
 
+And finally to install the database
+
+``` bash
+$ php app/console cloud-deploy:install
+```
+
+*Note: the configured database user must have permission to execute `CREATE DATABASE` and `CREATE TABLE` commands. If not, you can manually create the database and run the installation SQL file (`src/CloudDeploy/Resources/sql/install.sql`)*
+
 How to upgrade nodes
 ----------
 
