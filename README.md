@@ -82,8 +82,8 @@ Ideally, schedule this as a cron job:
 # m h  dom mon dow   command
 
 # Check for releases every 5 minutes
-*/5 0 0 0 0 /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 1>
-*/5 0 0 0 0 /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 2>
+*/5 * * * * /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 1>
+*/5 * * * * /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 2>
 
 ```
 
