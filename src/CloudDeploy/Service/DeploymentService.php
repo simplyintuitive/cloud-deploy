@@ -92,7 +92,7 @@ class DeploymentService {
 	 * @param Upgrade $upgrade
 	 * @return $this
 	 */
-	private function checkoutUpgrade(Upgrade $upgrade, $output) {
+	private function checkoutUpgrade(Upgrade $upgrade) {
 		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_CHECKOUT);
 		
 		$upgrade->getRelease()->getDeployment()->checkout($upgrade->getRelease()->getVersionName());
