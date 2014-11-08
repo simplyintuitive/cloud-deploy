@@ -54,7 +54,7 @@ Then run
 
 ``` bash
 $ curl -s https://getcomposer.org/installer | php
-$ composer install
+$ php composer.phar install
 ```
 
 And finally to install the database
