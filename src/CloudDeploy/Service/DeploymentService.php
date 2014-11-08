@@ -99,7 +99,7 @@ class DeploymentService {
 		
 		if ( Release::TYPE_BRANCH == $upgrade->getRelease()->getVersionType() ) {
 			$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_PULL);
-			$upgrade->getRelease()->getDeployment()->pull($upgrade->getRelease()->getVersionName());
+			$upgrade->getRelease()->getDeployment()->pull();
 		}
 		
 		return $this;
