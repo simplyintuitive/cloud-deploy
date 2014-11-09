@@ -3,8 +3,7 @@
 namespace CloudDeploy\Git;
 
 use Exception;
-
-use GitElephant\Command\FetchCommand;
+use InvalidArgumentException;
 use GitElephant\Objects\Branch;
 use GitElephant\Objects\Commit;
 use GitElephant\Objects\Tag;
@@ -92,7 +91,11 @@ class Deployment {
 	 * @return Branch|null
 	 */
 	public function getCurrentBranch() {
-		return $this->repository->getMainBranch();
+		try {
+			return $this->repository->getMainBranch();
+		} catch ( InvalidArgumentException $e ) {
+			return null;
+		}
 	}
 	
 	/**
@@ -116,6 +119,14 @@ class Deployment {
 	}
 	
 	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function hasBranch($name) {
+		return in_array($name, $this->repository->getBranches(true));
+	}
+	
+	/**
 	 * Fetch objects from another repository.
 	 * 
 	 * @param string $from
@@ -132,5 +143,13 @@ class Deployment {
 	 */
 	public function checkout($ref) {
 		$this->repository->checkout($ref);
+	}
+	
+	/**
+	 * @param string $from - remote repository
+	 * @param string $branch - name of branch
+	 */
+	public function pull($from = null, $branch = null) {
+		$this->repository->pull($from, $branch);
 	}
 }

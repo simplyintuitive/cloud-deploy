@@ -1,7 +1,9 @@
 # Cloud Deploy
-Cloud Deploy is a cloud deployment system allowing nodes to poll a server for releases and deploy upgrades via pull.
+Cloud Deploy is a cloud deployment system that monitors software deployments on nodes and deploys upgrades by pulling them from a central GIT repository.
 
-This library is written in the [Silex PHP micro-framework](http://silex.sensiolabs.org/). Currently it only supports Git to perform file upgrades, and MySQL to store current releases.
+Cloud Deploy supports multiple software deployments on a single node, allowing multiple software project to be monitored and upgraded.
+
+This library is written in the [Silex PHP micro-framework](http://silex.sensiolabs.org/) and uses the [GitElephant](https://github.com/matteosister/GitElephant) library. Currently it only supports Git to perform file upgrades, and MySQL to store current releases.
 
 How it works
 ------------
@@ -52,8 +54,16 @@ Then run
 
 ``` bash
 $ curl -s https://getcomposer.org/installer | php
-$ composer install
+$ php composer.phar install
 ```
+
+And finally to install the database
+
+``` bash
+$ php app/console cloud-deploy:install
+```
+
+*Note: the configured database user must have permission to execute `CREATE DATABASE` and `CREATE TABLE` commands. If not, you can manually create the database and run the installation SQL file (`src/CloudDeploy/Resources/sql/install.sql`)*
 
 How to upgrade nodes
 ----------
@@ -72,8 +82,8 @@ Ideally, schedule this as a cron job:
 # m h  dom mon dow   command
 
 # Check for releases every 5 minutes
-*/5 0 0 0 0 /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 1>
-*/5 0 0 0 0 /usr/bin/php </path/to/cloud-deploy>/app/console do-upgrade <name of deployment 2>
+*/5 * * * * /usr/bin/php </path/to/cloud-deploy>/app/console node:monitor <name of deployment 1>
+*/5 * * * * /usr/bin/php </path/to/cloud-deploy>/app/console node:monitor <name of deployment 2>
 
 ```
 

@@ -7,6 +7,10 @@ use CloudDeploy\Git\Deployment;
 
 class Release {
 	
+	const TYPE_BRANCH = 'branch';
+	const TYPE_TAG    = 'tag';
+	const TYPE_COMMIT = 'commit';
+	
 	/** @var int32 */
 	private $id;
 	

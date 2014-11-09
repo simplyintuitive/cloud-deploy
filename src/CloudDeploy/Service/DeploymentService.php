@@ -34,7 +34,9 @@ class DeploymentService {
 	public function getCurrentReleaseVersion(Deployment $deployment) {
 		$sql = "SELECT * FROM releases WHERE deployment = ? ORDER BY release_date DESC LIMIT 1";
 		$row = $this->getDb()->fetchAssoc($sql, array($deployment->getName()));
-		
+		if ( !$row ) {
+			throw new \Exception('There are no releases.');
+		}
 		
 		return new Release($deployment, $row);
 	}
@@ -91,8 +93,14 @@ class DeploymentService {
 	 * @return $this
 	 */
 	private function checkoutUpgrade(Upgrade $upgrade) {
-		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_FETCH);
-		$upgrade->getRelease()->getDeployment()->checkout($upgrade->getRelease()->getVersionCommit());
+		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_CHECKOUT);
+		
+		$upgrade->getRelease()->getDeployment()->checkout($upgrade->getRelease()->getVersionName());
+		
+		if ( Release::TYPE_BRANCH == $upgrade->getRelease()->getVersionType() ) {
+			$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_PULL);
+			$upgrade->getRelease()->getDeployment()->pull();
+		}
 		
 		return $this;
 	}

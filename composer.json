@@ -1,18 +1,19 @@
 {
 	"require": {
-		"silex/silex": "~1.2",
-		"twig/twig": ">=1.8,<2.0-dev",
-		"symfony/twig-bridge": "~2.3",
+		"cypresslab/gitelephant": "~1.0",
+		"deralex/yaml-config-service-provider": "1.0.x-dev",
 		"doctrine/dbal": "2.2.*",
+		"knplabs/console-service-provider": "dev-master",
+		"silex/silex": "~1.2",
+		"symfony/twig-bridge": "~2.3",
 		"symfony/form": "~2.3",
 		"symfony/validator": "~2.3",
 		"symfony/config": "~2.3",
 		"symfony/translation": "~2.3",
 		"symfony/security-csrf": "~2.4",
 		"symfony/yaml": "~2.4",
-		"deralex/yaml-config-service-provider": "1.0.x-dev",
-		"cypresslab/gitelephant": "~1.0",
-		"knplabs/console-service-provider": "dev-master"
+		"symfony/process": "~2.0",
+		"twig/twig": ">=1.8,<2.0-dev"
 	},
 	
 	"autoload": {
