@@ -1,4 +1,5 @@
 vendor
+app/cache/*
 app/config/config.yml
 composer.phar
 composer.lock
