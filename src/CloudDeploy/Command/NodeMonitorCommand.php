@@ -2,6 +2,7 @@
 
 namespace CloudDeploy\Command;
 
+use Exception;
 use CloudDeploy\Git\Deployment;
 use CloudDeploy\Model\Release;
 use CloudDeploy\Service\DeploymentService;
@@ -17,6 +18,9 @@ class NodeMonitorCommand extends Command {
 	
 	/** @var OutputInterface */
 	private $output;
+
+	/** @var Deployment */
+	private $deployment;
 		
 	protected function configure() {
 		$this
@@ -29,36 +33,33 @@ class NodeMonitorCommand extends Command {
 		$this->input	= $input;
 		$this->output	= $output;
 		
-		$deployment	= $this->getDeployment($this->input->getArgument('deployment'));
+		$this->deployment	= $this->getDeployment($this->input->getArgument('deployment'));
 		
-		$release = $this->getDeployService()->getCurrentReleaseVersion($deployment);
+		$release = $this->getDeployService()->getCurrentReleaseVersion($this->deployment);
 		
 		$this->output->writeLn('<info>Compiling release and deployment information...</info>');
 		$this->output->writeLn('  <comment>Release:</comment> '. str_pad(ucfirst($release->getVersionType()), 6) .' : ' .  $release->getVersionName());
-		$this->output->writeLn('  <comment>Current:</comment> '. $this->determineCurrentCheckout($deployment));	
+		$this->output->writeLn('  <comment>Current:</comment> '. $this->determineCurrentCheckout($this->deployment));
 		
 		$upgrade_required = false;
 		switch ( $release->getVersionType() ) {
 			case Release::TYPE_BRANCH:
-				$current_branch = $deployment->getCurrentBranch();
-				if ( $current_branch ) {
-					$this->fetchBranch($deployment, $current_branch);
-				}
-				if ( !$current_branch
+				$current_branch = $this->deployment->getCurrentBranch();
+				$upgrade_required = (
+					!$current_branch
 					|| $current_branch->getName() != $release->getVersionName()
-					|| $current_branch->getSha() != $deployment->getBranch($release->getVersionName())->getSha() )
-					{
-					$upgrade_required = true;
-				}
+					|| !$this->fetch($this->deployment)
+					|| !$this->deployment->isCurrentBranchUpToDate()
+				);
 				break;
 				
 			case Release::TYPE_TAG:
-				$current_tag = $deployment->getCurrentTag();
+				$current_tag = $this->deployment->getCurrentTag();
 				$upgrade_required = ( !$current_tag || $release->getVersionName() != $current_tag->getName() );
 				break;
 				
 			case Release::TYPE_COMMIT:
-				$current_commit = $deployment->getCurrentCommit();
+				$current_commit = $this->deployment->getCurrentCommit();
 				$upgrade_required = ( $release->getVersionName() != $current_commit );
 				break;
 		}
@@ -73,25 +74,30 @@ class NodeMonitorCommand extends Command {
 	}
 	
 	/**
-	 * @param Deployment $deployment
 	 * @return string
 	 */
-	private function determineCurrentCheckout($deployment) {
-		if ( $current_branch = $deployment->getCurrentBranch() ) {
+	private function determineCurrentCheckout() {
+		if ( $current_branch = $this->deployment->getCurrentBranch() ) {
 			return 'Branch : ' . $current_branch->getName();
-		} else if ( $current_tag = $deployment->getCurrentTag() ) {
+		} else if ( $current_tag = $this->deployment->getCurrentTag() ) {
 			return 'Tag    : ' . $current_tag->getName();
 		} else {
-			return 'Commit : '. $deployment->getCurrentCommit()->getSha(true);
+			return 'Commit : '. $this->deployment->getCurrentCommit()->getSha(true);
 		}
 	}
 	
 	/**
-	 * @param Deployment $deployment
+	 * @return boolean
 	 */
-	private function fetchBranch(Deployment $deployment, \GitElephant\Objects\Branch $branch) {
-		$this->output->writeLn(sprintf('<info>Fetching latest changes on branch "%s"...</info>', $branch->getName()));
-		$deployment->fetch('origin', $branch->getName());
+	private function fetch() {
+		try {
+			$this->output->writeLn(sprintf('<info>Fetching latest changes on origin...</info>'));
+			$this->deployment->fetch('origin');
+			return true;
+		} catch ( Exception $e ) {
+			return false;
+		}
+		
 	}
 	
 	/**
