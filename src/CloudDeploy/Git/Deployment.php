@@ -58,9 +58,11 @@ class Deployment {
 	 * @return Tag|null
 	 */
 	public function getCurrentTag() {
-		foreach ( $this->repository->getTags() as $tag) {
-			if ( $this->getCurrentCommit()->getSha() == $tag->getSha() ) {
-				return $tag;
+		if ( !$this->getCurrentBranch() ) {
+			foreach ( $this->repository->getTags() as $tag) {
+				if ( $this->getCurrentCommit()->getSha() == $tag->getSha() ) {
+					return $tag;
+				}
 			}
 		}
 		
