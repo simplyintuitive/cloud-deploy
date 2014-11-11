@@ -125,6 +125,15 @@ class Deployment {
 	public function hasBranch($name) {
 		return in_array($name, $this->repository->getBranches(true));
 	}
+
+	/**
+	 * Determine if current branch is up to date with remote
+	 *
+	 * @return boolean
+	 */
+	public function isCurrentBranchUpToDate() {
+		return ( $current_branch = $this->getCurrentBranch() && 0 == $this->repository->getLog('--' , /*$path=*/'HEAD..origin/' . $this->getCurrentBranch()->getName(), /*$limit=*/1)->count() );
+	}
 	
 	/**
 	 * Fetch objects from another repository.
