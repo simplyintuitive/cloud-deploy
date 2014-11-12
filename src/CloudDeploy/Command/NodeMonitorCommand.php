@@ -39,7 +39,7 @@ class NodeMonitorCommand extends Command {
 		
 		$this->output->writeLn('<info>Compiling release and deployment information...</info>');
 		$this->output->writeLn('  <comment>Release:</comment> '. str_pad(ucfirst($release->getVersionType()), 6) .' : ' .  $release->getVersionName());
-		$this->output->writeLn('  <comment>Current:</comment> '. $this->determineCurrentCheckout($this->deployment));
+		$this->output->writeLn('  <comment>Current:</comment> '. ucfirst(str_replace(':', ' : ', $deployment->getCurrentCheckout($deployment))));
 		
 		$upgrade_required = false;
 		switch ( $release->getVersionType() ) {
@@ -73,19 +73,7 @@ class NodeMonitorCommand extends Command {
 		}
 	}
 	
-	/**
-	 * @return string
-	 */
-	private function determineCurrentCheckout() {
-		if ( $current_branch = $this->deployment->getCurrentBranch() ) {
-			return 'Branch : ' . $current_branch->getName();
-		} else if ( $current_tag = $this->deployment->getCurrentTag() ) {
-			return 'Tag    : ' . $current_tag->getName();
-		} else {
-			return 'Commit : '. $this->deployment->getCurrentCommit()->getSha(true);
-		}
-	}
-	
+
 	/**
 	 * @return boolean
 	 */

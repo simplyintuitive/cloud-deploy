@@ -1,0 +1,19 @@
+
+<table>
+	<thead>
+		<tr>
+			<th>Release Date</th>
+			<th>Release Type</th>
+			<th>Release Version</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for release in releases %}
+			<tr>
+				<td><a href="{{ path('release_index', { 'deployment': deployment.name, 'release_id': release.id }) }}">{{ release.date.format('Y-m-d H:i:s') }}</a></td>
+				<td>{{ release.versionType|capitalize }}</td>
+				<td>{{ release.versionName }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

@@ -1,0 +1,25 @@
+Release: {{ release.versionType|capitalize }} : {{ release.versionName }}<br />
+
+<table>
+	<thead>
+		<tr>
+			<th colspan="4">Upgrades</th>
+		</tr>
+		<tr>
+			<th>Node</th>
+			<th>Status</th>
+			<th>Start Date</th>
+			<th>End Date</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for upgrade in upgrades %}
+			<tr>
+				<th>{{ upgrade.node }}</th>
+				<td>{{ upgrade.status }}</td>
+				<td>{{ upgrade.startDate.format('Y-m-d H:i:s') }}</td>
+				<td>{{ upgrade.finishDate.format('Y-m-d H:i:s') }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

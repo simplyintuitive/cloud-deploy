@@ -1,0 +1,9 @@
+<table>
+	{% for name, config in deployments %}
+		<tr>
+			<th><a href="{{ url('deployment_index', { 'deployment': name }) }}">{{ name }}</a></th>
+			<td>{{ config.type|title }}</td>
+			<td>{{ config.path }}</td>
+		</tr>
+	{% endfor %}
+</table>
