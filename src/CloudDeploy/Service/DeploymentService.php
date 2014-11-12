@@ -61,6 +61,7 @@ class DeploymentService {
 	 * @param Release $release
 	 * @param type $node
 	 * @return Upgrade
+	 * @throws Exception - rethrows any exceptions thrown
 	 */
 	public function do_upgrade(Release $release, $node) {
 		$upgrade = $this->createUpgrade($release, $node);
@@ -72,6 +73,7 @@ class DeploymentService {
 				->completeUpgrade($upgrade);
 		} catch ( Exception $e ) {
 			$this->abortUpgrade($upgrade);
+			throw $e;
 		}
 		
 		return $upgrade;
@@ -99,7 +101,7 @@ class DeploymentService {
 		
 		if ( Release::TYPE_BRANCH == $upgrade->getRelease()->getVersionType() ) {
 			$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_PULL);
-			$upgrade->getRelease()->getDeployment()->pull();
+			$upgrade->getRelease()->getDeployment()->pull('origin', $upgrade->getRelease()->getVersionName());
 		}
 		
 		return $this;
