@@ -77,7 +77,7 @@ class App extends Application {
 	 * @return $this
 	 */
 	private function registerRoutes() {
-		$this->mount('/{deployment}/', new DeploymentControllerProvider());
+		$this->mount('/', new DeploymentControllerProvider());
 
 		return $this;
 	}

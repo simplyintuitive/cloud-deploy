@@ -4,6 +4,7 @@ namespace CloudDeploy\Git;
 
 use Exception;
 use InvalidArgumentException;
+use CloudDeploy\Model\Release;
 use GitElephant\Objects\Branch;
 use GitElephant\Objects\Commit;
 use GitElephant\Objects\Tag;
@@ -162,5 +163,19 @@ class Deployment {
 	 */
 	public function pull($from = null, $branch = null) {
 		$this->repository->pull($from, $branch);
+	}
+
+	/**
+	 * @param Deployment $deployment
+	 * @return string
+	 */
+	public function getCurrentCheckout() {
+		if ( $current_branch = $this->getCurrentBranch() ) {
+			return Release::TYPE_BRANCH . ':' . $current_branch->getName();
+		} else if ( $current_tag = $this->getCurrentTag() ) {
+			return Release::TYPE_TAG . ':' . $current_tag->getName();
+		} else {
+			return Release::TYPE_COMMIT . ':' . $this->getCurrentCommit()->getSha(true);
+		}
 	}
 }

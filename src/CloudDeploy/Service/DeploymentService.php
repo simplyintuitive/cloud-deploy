@@ -4,6 +4,7 @@ namespace CloudDeploy\Service;
 
 use DateTime;
 use Exception;
+use PDO;
 use CloudDeploy\Git\Deployment;
 use CloudDeploy\Model\Release;
 use CloudDeploy\Model\Upgrade;
@@ -26,22 +27,6 @@ class DeploymentService {
 	}
 	
 	/**
-	 * Return the current release version for the deployment
-	 * 
-	 * @param Deployment $deployment
-	 * @return Release
-	 */
-	public function getCurrentReleaseVersion(Deployment $deployment) {
-		$sql = "SELECT * FROM releases WHERE deployment = ? ORDER BY release_date DESC LIMIT 1";
-		$row = $this->getDb()->fetchAssoc($sql, array($deployment->getName()));
-		if ( !$row ) {
-			throw new \Exception('There are no releases.');
-		}
-		
-		return new Release($deployment, $row);
-	}
-	
-	/**
 	 * @param string $name
 	 * @return Deployment
 	 * @throws Exception
@@ -53,8 +38,77 @@ class DeploymentService {
 			}
 			$this->deployments[$name]	= new Deployment($name, $this->app['config']['deployments'][$name]);
 		}
-		
+
 		return $this->deployments[$name];
+	}
+
+	/**
+	 * @param Deployment $deployment
+	 * @param int $limit
+	 * @return Release[]
+	 */
+	public function getDeploymentReleases(Deployment $deployment, $limit = null) {
+		$sql = "SELECT * FROM releases WHERE deployment = ? ORDER BY release_date DESC". ( $limit ? " LIMIT {$limit}" : '' );
+		$result = $this->getDb()->executeQuery($sql, [$deployment->getName()]);
+
+		$releases = [];
+		while ( $row = $result->fetch(PDO::FETCH_ASSOC) ) {
+			$releases[] = new Release($deployment, $row);
+		}
+
+		return $releases;
+	}
+
+	/**
+	 * Return the current release version for the deployment
+	 *
+	 * @param Deployment $deployment
+	 * @return Release
+	 */
+	public function getCurrentReleaseVersion(Deployment $deployment) {
+		$releases	= $this->getDeploymentReleases($deployment, 1);
+		if ( 0 == count($releases) ) {
+			throw new \Exception('There are no releases.');
+		}
+
+		return $releases[0];
+	}
+
+	/**
+	 * Get a specific release
+	 * 
+	 * @param Deployment $deployment
+	 * @param int $release_id
+	 * @return Release
+	 * @throws Exception
+	 */
+	public function getRelease(Deployment $deployment, $release_id) {
+		$sql = "SELECT * FROM releases WHERE release_id = ?";
+		$row = $this->getDb()->fetchAssoc($sql, [$release_id]);
+
+		if ( !$row ) {
+			throw new \Exception(sprintf('Release \'%s\' does not exist.', $release_id));
+		}
+
+		return new Release($deployment, $row);
+	}
+
+	/**
+	 * Get upgrades for supplied release
+	 *
+	 * @param Release $release
+	 * @return Upgrade[]
+	 */
+	public function getReleaseUpgrades(Release $release) {
+		$sql = "SELECT * FROM upgrades WHERE release_id = ? ORDER BY upgrade_start_date";
+		$result = $this->getDb()->executeQuery($sql, [$release->getId()]);
+
+		$upgrades = [];
+		while ( $row = $result->fetch(PDO::FETCH_ASSOC) ) {
+			$upgrades[] = new Upgrade($release, $row);
+		}
+
+		return $upgrades;
 	}
 	
 	/**
