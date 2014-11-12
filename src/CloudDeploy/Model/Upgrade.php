@@ -3,6 +3,7 @@
 namespace CloudDeploy\Model;
 
 use DateTime;
+use CloudDeploy\Model\Node;
 use CloudDeploy\Model\Release;
 
 class Upgrade {
@@ -21,7 +22,7 @@ class Upgrade {
 	/** @var Release */
 	private $release;
 	
-	/** @var string */
+	/** @var Node */
 	private $node;
 	
 	/** @var string */
@@ -37,8 +38,9 @@ class Upgrade {
 	 * @param Release $release
 	 * @param array $row_data
 	 */
-	public function __construct(Release $release = null, array $row_data = []) {
+	public function __construct(Release $release = null, Node $node = null, array $row_data = []) {
 		$this->setRelease($release);
+		$this->setNode($node);
 		
 		if ( $row_data ) {
 			if ( $row_data['upgrade_start_date'] ) {
@@ -49,7 +51,6 @@ class Upgrade {
 			}
 
 			$this->setId($row_data['upgrade_id']);
-			$this->setNode($row_data['node']);
 			$this->setStartDate($row_data['upgrade_start_date']);
 			$this->setFinishDate($row_data['upgrade_finish_date']);
 			$this->setStatus($row_data['status']);
@@ -91,17 +92,17 @@ class Upgrade {
 	}
 
 	/**
-	 * @return string
+	 * @return Node
 	 */
 	public function getNode() {
 		return $this->node;
 	}
 	
 	/**
-	 * @param string $node
+	 * @param Node $node
 	 * @return $this;
 	 */
-	public function setNode($node) {
+	public function setNode(Node $node) {
 		$this->node = $node;
 		
 		return $this;

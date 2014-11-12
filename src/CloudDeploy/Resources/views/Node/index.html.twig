@@ -1,5 +1,5 @@
 Deployment: <a href="{{ path('deployment_index', { 'deployment': deployment.name }) }}">{{deployment.name}}</a><br />
-Release: {{ release.versionType|capitalize }} : {{ release.versionName }}<br />
+Node: {{node.name}}<br />
 
 <table>
 	<thead>
@@ -7,7 +7,7 @@ Release: {{ release.versionType|capitalize }} : {{ release.versionName }}<br />
 			<th colspan="4">Upgrades</th>
 		</tr>
 		<tr>
-			<th>Node</th>
+			<th>Release</th>
 			<th>Status</th>
 			<th>Start Date</th>
 			<th>End Date</th>
@@ -16,7 +16,7 @@ Release: {{ release.versionType|capitalize }} : {{ release.versionName }}<br />
 	<tbody>
 		{% for upgrade in upgrades %}
 			<tr>
-				<th><a href="{{ path('node_index', { 'deployment': deployment.name, 'node': upgrade.node.name }) }}">{{ upgrade.node.name }}</a></th>
+				<th><a href="{{ path('release_index', { 'deployment': deployment.name, 'release': upgrade.release.id }) }}">{{ upgrade.release.versionType }} : {{ upgrade.release.versionName }}</a></th>
 				<td>{{ upgrade.status }}</td>
 				<td>{{ upgrade.startDate.format('Y-m-d H:i:s') }}</td>
 				<td>{{ upgrade.finishDate.format('Y-m-d H:i:s') }}</td>

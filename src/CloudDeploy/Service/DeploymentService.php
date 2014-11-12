@@ -6,6 +6,7 @@ use DateTime;
 use Exception;
 use PDO;
 use CloudDeploy\Git\Deployment;
+use CloudDeploy\Model\Node;
 use CloudDeploy\Model\Release;
 use CloudDeploy\Model\Upgrade;
 use Silex\Application;
@@ -76,7 +77,7 @@ class DeploymentService {
 
 	/**
 	 * Get a specific release
-	 * 
+	 *
 	 * @param Deployment $deployment
 	 * @param int $release_id
 	 * @return Release
@@ -100,25 +101,64 @@ class DeploymentService {
 	 * @return Upgrade[]
 	 */
 	public function getReleaseUpgrades(Release $release) {
-		$sql = "SELECT * FROM upgrades WHERE release_id = ? ORDER BY upgrade_start_date";
+		$sql = "SELECT * FROM upgrades WHERE release_id = ? ORDER BY upgrade_start_date DESC";
 		$result = $this->getDb()->executeQuery($sql, [$release->getId()]);
 
+		$nodes    = [];
 		$upgrades = [];
 		while ( $row = $result->fetch(PDO::FETCH_ASSOC) ) {
-			$upgrades[] = new Upgrade($release, $row);
+			if ( !isset($nodes[$row['node']]) ) {
+				$nodes[$row['node']] = $this->getNode($row['node']);
+			}
+
+			$upgrades[] = new Upgrade($release, $nodes[$row['node']], $row);
 		}
 
 		return $upgrades;
 	}
-	
+
+	/**
+	 * @param string $name
+	 * @return Node
+	 */
+	public function getNode($name) {
+		return new Node($name);
+	}
+
+	/**
+	 * @param Node $node
+	 * @return Upgrade[]
+	 */
+	public function getDeploymentNodeUpgrades(Deployment $deployment, Node $node) {
+		$sql = "SELECT *"
+			. " FROM upgrades"
+			. " INNER JOIN releases ON upgrades.release_id = releases.release_id"
+			. " WHERE deployment = ?"
+			. "		AND node = ?"
+			. " ORDER BY upgrade_start_date DESC";
+		$result = $this->getDb()->executeQuery($sql, [$deployment->getName(), $node->getName()]);
+
+		$releases = [];
+		$upgrades = [];
+		while ( $row = $result->fetch(PDO::FETCH_ASSOC) ) {
+			if ( !isset($releases[$row['release_id']]) ) {
+				$releases[$row['release_id']] = new Release($deployment, $row);
+			}
+
+			$upgrades[] = new Upgrade($releases[$row['release_id']], $node, $row);
+		}
+
+		return $upgrades;
+	}
+
 	/**
 	 * @param Release $release
-	 * @param type $node
+	 * @param Node $node
 	 * @return Upgrade
 	 */
-	public function do_upgrade(Release $release, $node) {
+	public function do_upgrade(Release $release, Node $node) {
 		$upgrade = $this->createUpgrade($release, $node);
-		
+
 		try {
 			$this
 				->fetchUpgrade($upgrade)
@@ -175,38 +215,38 @@ class DeploymentService {
 	 */
 	private function abortUpgrade(Upgrade $upgrade) {
 		$this->updateUpgradeStatus($upgrade, Upgrade::STATUS_ABORT);
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * @param Release $release
-	 * @param string $node
+	 * @param Node $node
 	 * @return Upgrade
 	 */
-	private function createUpgrade(Release $release, $node) {
+	private function createUpgrade(Release $release, Node $node) {
 		$date = new DateTime();
-		
-		$upgrade = new Upgrade($release);
+
+		$upgrade = new Upgrade($release, $node);
 		$upgrade
 			->setNode($node)
 			->setStartDate($date)
 			->setFinishDate($date)
 			->setStatus(Upgrade::STATUS_STARTED);
-		
+
 		$this->getDb()->insert('upgrades', [
 			'release_id' => (int) $upgrade->getRelease()->getId(),
-			'node' => $upgrade->getNode(),
+			'node' => $upgrade->getNode()->getName(),
 			'upgrade_start_date' => $upgrade->getStartDate()->format('Y-m-d H:i:s'),
 			'upgrade_finish_date' => $upgrade->getFinishDate()->format('Y-m-d H:i:s'),
 			'status' => $upgrade->getStatus(),
 		]);
-		
+
 		$upgrade->setId($this->getDb()->lastInsertId());
-		
+
 		return $upgrade;
 	}
-	
+
 	/**
 	 * @param Upgrade $upgrade
 	 * @param string $status
