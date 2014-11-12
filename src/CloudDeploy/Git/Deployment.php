@@ -134,7 +134,10 @@ class Deployment {
 	 * @return boolean
 	 */
 	public function isCurrentBranchUpToDate() {
-		return ( $current_branch = $this->getCurrentBranch() && 0 == $this->repository->getLog('--' , /*$path=*/'HEAD..origin/' . $this->getCurrentBranch()->getName(), /*$limit=*/1)->count() );
+		return (
+			$current_branch = $this->getCurrentBranch()
+			&& 0 == $this->repository->getLog('HEAD..origin/' . $this->getCurrentBranch()->getName(), /*$path=*/null, /*$limit=*/1)->count()
+		);
 	}
 	
 	/**
@@ -159,8 +162,9 @@ class Deployment {
 	/**
 	 * @param string $from - remote repository
 	 * @param string $branch - name of branch
+	 * @param boolean $rebase - whether to rebase
 	 */
-	public function pull($from = null, $branch = null) {
-		$this->repository->pull($from, $branch);
+	public function pull($from = null, $branch = null, $rebase = false) {
+		$this->repository->pull($from, $branch, $rebase);
 	}
 }
