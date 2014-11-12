@@ -46,11 +46,11 @@ class DeploymentControllerProvider implements ControllerProviderInterface
 		})
 		->bind('deployment_index');
 
-		$controllers->get('/{deployment}/release/{release_id}/', function($deployment, $release_id) use ($app) {
+		$controllers->get('/{deployment}/release/{release}/', function($deployment, $release) use ($app) {
 			$deployment	= $this->getDeployment($deployment);
 
 			try {
-				$release = $this->getDeployService()->getRelease($deployment, $release_id);
+				$release = $this->getDeployService()->getRelease($deployment, $release);
 				$upgrades = $this->getDeployService()->getReleaseUpgrades($release);
 			} catch ( \Exception $e ) {
 				$release = null;
@@ -64,6 +64,19 @@ class DeploymentControllerProvider implements ControllerProviderInterface
 			]);
 		})
 		->bind('release_index');
+
+		$controllers->get('/{deployment}/node/{node}/', function($deployment, $node) use ($app) {
+			$deployment	= $this->getDeployment($deployment);
+			$node       = $this->getDeployService()->getNode($node);
+			$upgrades   = $this->getDeployService()->getDeploymentNodeUpgrades($deployment, $node);
+
+			return $app['twig']->render('Node/index.html.twig', [
+				'deployment' => $deployment,
+				'node' => $node,
+				'upgrades' => $upgrades,
+			]);
+		})
+		->bind('node_index');
 
 		$controllers->get('/{deployment}/{object_type}/', function($deployment, $object_type) use($app) {
 			$method	= 'getAll' . ucfirst($object_type);

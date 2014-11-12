@@ -39,7 +39,7 @@ class NodeMonitorCommand extends Command {
 		
 		$this->output->writeLn('<info>Compiling release and deployment information...</info>');
 		$this->output->writeLn('  <comment>Release:</comment> '. str_pad(ucfirst($release->getVersionType()), 6) .' : ' .  $release->getVersionName());
-		$this->output->writeLn('  <comment>Current:</comment> '. ucfirst(str_replace(':', ' : ', $deployment->getCurrentCheckout($deployment))));
+		$this->output->writeLn('  <comment>Current:</comment> '. ucfirst(str_replace(':', ' : ', $this->deployment->getCurrentCheckout())));
 		
 		$upgrade_required = false;
 		switch ( $release->getVersionType() ) {
@@ -66,7 +66,8 @@ class NodeMonitorCommand extends Command {
 		
 		if ( $upgrade_required ) {
 			$this->output->writeLn('<info>Upgrading...</info>');
-			$this->getDeployService()->do_upgrade($release, gethostname());
+			$node = $this->getDeployService()->getNode(gethostname());
+			$this->getDeployService()->do_upgrade($release, $node);
 			$this->output->writeLn('<info>Done!</info>');
 		} else {
 			$this->output->writeLn('<info>Currently at the correct version</info>');
