@@ -182,18 +182,4 @@ class Deployment {
 			return Release::TYPE_COMMIT . ':' . $this->getCurrentCommit()->getSha(true);
 		}
 	}
-
-	/**
-	 * @param Deployment $deployment
-	 * @return string
-	 */
-	public function getCurrentCheckout() {
-		if ( $current_branch = $this->getCurrentBranch() ) {
-			return Release::TYPE_BRANCH . ':' . $current_branch->getName();
-		} else if ( $current_tag = $this->getCurrentTag() ) {
-			return Release::TYPE_TAG . ':' . $current_tag->getName();
-		} else {
-			return Release::TYPE_COMMIT . ':' . $this->getCurrentCommit()->getSha(true);
-		}
-	}
 }
